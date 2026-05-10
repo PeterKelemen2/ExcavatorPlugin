@@ -24,3 +24,14 @@ CHANGED - Updated `StorageManager` class to persist scoreboard data
 ```
 
 After the pull request has been reviewed, approved, and passes all automated checks, it will be merged into main.
+
+## Contributing to Excavator
+
+Thank you for your interest in contributing!
+
+- Fork the repository
+- Create a feature branch
+- Make your changes
+- Submit a pull request
+
+Please keep pull requests focused and descriptive. All contributions must comply with the GPLv3 license.

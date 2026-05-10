@@ -1,20 +1,20 @@
-main: ${PACKAGE}.${NAME}
-name: ${NAME}
-version: "${VERSION}"
-api-version: "1.21.11"
+main: dev.peti.excavator.ExcavatorPlugin
+name: Excavator
+version: "1.0.0"
+api-version: "1.21"
 author: AUTHOR
 description: DESCRIPTION
 commands:
-  ex:
-    description: Base command for EXAMPLE
-    usage: "For a list of commands, type /ex help"
-    aliases: example
+  excavator:
+    description: Base command for Excavator
+    usage: "For a list of commands, type /excavator help"
+    aliases: ex
 permissions:
-  example.test:
+  excavator.test:
     description: DESCRIPTION
     default: true
-  example.*:
+  excavator.*:
     description: Grants all other permissions
     default: false
     children:
-      example.test: true
+      excavator.test: true

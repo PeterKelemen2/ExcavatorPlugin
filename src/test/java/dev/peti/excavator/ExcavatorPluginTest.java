@@ -1,16 +1,17 @@
-package com.crimsonwarpedcraft.exampleplugin;
+package dev.peti.excavator;
 
 import org.junit.jupiter.api.Test;
 
 /**
- * Tests for ExamplePlugin.
+ * Tests for ExcavatorPlugin.
  *
  * @author Copyright (c) Levi Muniz. All Rights Reserved.
  */
-public class ExamplePluginTest {
+public class ExcavatorPluginTest {
 
   @Test
   public void onEnable() {
 
   }
 }
+
