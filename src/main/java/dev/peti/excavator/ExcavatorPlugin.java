@@ -13,24 +13,24 @@ import org.bukkit.plugin.java.JavaPlugin;
  * @author Copyright (c) Levi Muniz. All Rights Reserved.
  */
 public class ExcavatorPlugin extends JavaPlugin {
-  private ToolFactory toolFactory;
-  private ToolManager toolManager;
+	private ToolFactory toolFactory;
+	private ToolManager toolManager;
 
-  @Override
-  public void onEnable() {
-    PaperLib.suggestPaper(this);
-    this.toolFactory = new ToolFactory(this);
-    this.toolManager = new ToolManager(this);
-    getCommand("excavator").setExecutor(new GiveToolCommand(this, toolFactory));
-    getServer().getPluginManager().registerEvents(new BlockBreakListener(this), this);
-    saveDefaultConfig();
-  }
+	@Override
+	public void onEnable() {
+		PaperLib.suggestPaper(this);
+		this.toolFactory = new ToolFactory(this);
+		this.toolManager = new ToolManager(this);
+		getCommand("excavator").setExecutor(new GiveToolCommand(this, toolFactory));
+		getServer().getPluginManager().registerEvents(new BlockBreakListener(this), this);
+		saveDefaultConfig();
+	}
 
-  public ToolFactory getToolFactory() {
-    return toolFactory;
-  }
+	public ToolFactory getToolFactory() {
+		return toolFactory;
+	}
 
-  public ToolManager getToolManager() {
-    return toolManager;
-  }
+	public ToolManager getToolManager() {
+		return toolManager;
+	}
 }
