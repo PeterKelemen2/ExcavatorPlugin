@@ -56,8 +56,7 @@ public class GiveToolCommand implements CommandExecutor {
 			sender.sendMessage("§cInvalid tool type. Use 2x2, 3x3, or 5x5.");
 			return true;
 		}
-		// Default to NETHERITE_PICKAXE
-		ItemStack tool = toolFactory.createExcavator(type, Material.NETHERITE_PICKAXE);
+		ItemStack tool = toolFactory.createExcavator(type);
 		target.getInventory().addItem(tool);
 		sender.sendMessage("§aGave " + type.getDisplayName() + " to " + target.getName() + ".");
 		return true;

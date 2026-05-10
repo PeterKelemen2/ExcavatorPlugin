@@ -23,22 +23,19 @@ public class ToolFactory {
 	}
 
 	/**
-	 * Creates an excavator tool.
+	 * Creates an excavator tool of the correct material for the type.
 	 * @param type the tool type
-	 * @param baseMaterial the base material
 	 * @return the item stack
 	 */
-	public ItemStack createExcavator(ExcavatorToolType type, Material baseMaterial) {
-		if (!isPickaxe(baseMaterial)) {
-			throw new IllegalArgumentException("Base material must be a pickaxe");
-		}
-		ItemStack item = new ItemStack(baseMaterial);
+	public ItemStack createExcavator(ExcavatorToolType type) {
+		ItemStack item = new ItemStack(type.getMaterial());
 		ItemMeta meta = item.getItemMeta();
 		if (meta == null) {
 			throw new IllegalStateException("ItemMeta is null");
 		}
 		meta.getPersistentDataContainer().set(excavatorKey, PersistentDataType.INTEGER, type.getSize());
 		meta.setDisplayName(type.getDisplayName());
+		meta.setLore(type.getLore());
 		item.setItemMeta(meta); // Ensure meta is applied
 		return item;
 	}
