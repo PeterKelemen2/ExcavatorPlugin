@@ -69,6 +69,6 @@ public class DurabilityManager {
 	public static void applyDamage(ItemStack tool, int cost) {
 		Damageable meta = (Damageable) tool.getItemMeta();
 		meta.setDamage(meta.getDamage() + cost);
-		// setItemMeta has no side effect, so this call is unnecessary
+		tool.setItemMeta((org.bukkit.inventory.meta.ItemMeta) meta);
 	}
 }

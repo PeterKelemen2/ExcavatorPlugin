@@ -5,6 +5,9 @@ import org.bukkit.GameMode;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.Damageable;
+import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.Sound;
 import java.util.List;
 
 public class MiningProcessor {
@@ -39,6 +42,14 @@ public class MiningProcessor {
 		// Durability application
 		if (!creative && durabilityCost > 0) {
 			DurabilityManager.applyDamage(tool, durabilityCost);
+			// Check if tool is broken
+			Damageable meta = (Damageable) tool.getItemMeta();
+			int max = tool.getType().getMaxDurability();
+			if (meta.getDamage() >= max) {
+				// Remove the tool and play break animation
+				player.getInventory().setItem(EquipmentSlot.HAND, null);
+				player.playSound(player.getLocation(), Sound.ENTITY_ITEM_BREAK, 1.0f, 1.0f);
+			}
 		}
 	}
 }
