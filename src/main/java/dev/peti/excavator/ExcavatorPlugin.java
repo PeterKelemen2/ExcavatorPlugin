@@ -1,6 +1,7 @@
 package dev.peti.excavator;
 
 import dev.peti.excavator.commands.GiveToolCommand;
+import dev.peti.excavator.commands.GiveToolTabCompleter;
 import dev.peti.excavator.listeners.BlockBreakListener;
 import dev.peti.excavator.tools.ToolFactory;
 import dev.peti.excavator.tools.ToolManager;
@@ -22,6 +23,7 @@ public class ExcavatorPlugin extends JavaPlugin {
 		this.toolFactory = new ToolFactory(this);
 		this.toolManager = new ToolManager(this);
 		getCommand("excavator").setExecutor(new GiveToolCommand(this, toolFactory));
+		getCommand("excavator").setTabCompleter(new GiveToolTabCompleter());
 		getServer().getPluginManager().registerEvents(new BlockBreakListener(this), this);
 		saveDefaultConfig();
 	}
