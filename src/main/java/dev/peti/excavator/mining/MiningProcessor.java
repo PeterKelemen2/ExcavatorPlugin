@@ -8,7 +8,13 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.Sound;
+import org.bukkit.World;
+import org.bukkit.Material;
+import org.bukkit.entity.ExperienceOrb;
+import org.bukkit.event.block.BlockBreakEvent;
+
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class MiningProcessor {
 	private final ProtectionManager protectionManager;
@@ -37,7 +43,19 @@ public class MiningProcessor {
 		}
 		// Mining
 		for (Block block : area) {
+			// Fire BlockBreakEvent for plugin compatibility
+			BlockBreakEvent breakEvent = new BlockBreakEvent(block, player);
+			org.bukkit.Bukkit.getPluginManager().callEvent(breakEvent);
+			if (breakEvent.isCancelled()) continue;
+			Material preBreakType = block.getType();
+			boolean silkTouch = tool != null && tool.containsEnchantment(org.bukkit.enchantments.Enchantment.SILK_TOUCH);
 			block.breakNaturally(tool);
+			int exp = getVanillaXp(preBreakType, silkTouch);
+			if (!creative && exp > 0) {
+				World world = block.getWorld();
+				ExperienceOrb orb = world.spawn(block.getLocation().add(0.5, 0.5, 0.5), ExperienceOrb.class);
+				orb.setExperience(exp);
+			}
 		}
 		// Durability application
 		if (!creative && durabilityCost > 0) {
@@ -52,5 +70,25 @@ public class MiningProcessor {
 			}
 		}
 	}
-}
 
+	private int getVanillaXp(Material type, boolean silkTouch) {
+		if (silkTouch) return 0;
+		return switch (type) {
+			case COAL_ORE, DEEPSLATE_COAL_ORE, NETHER_GOLD_ORE ->
+					ThreadLocalRandom.current().nextInt(2); // 0-1
+
+			case DIAMOND_ORE, DEEPSLATE_DIAMOND_ORE,
+				 EMERALD_ORE, DEEPSLATE_EMERALD_ORE ->
+					ThreadLocalRandom.current().nextInt(3, 7); // 3-6
+
+			case LAPIS_ORE, DEEPSLATE_LAPIS_ORE,
+				 NETHER_QUARTZ_ORE ->
+					ThreadLocalRandom.current().nextInt(2, 5); // 2-4
+
+			case REDSTONE_ORE, DEEPSLATE_REDSTONE_ORE ->
+					ThreadLocalRandom.current().nextInt(1, 6); // 1-5
+
+			default -> 0;
+		};
+	}
+}
