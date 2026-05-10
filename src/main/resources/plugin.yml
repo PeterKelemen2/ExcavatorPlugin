@@ -7,7 +7,7 @@ description: DESCRIPTION
 commands:
   excavator:
     description: Base command for Excavator
-    usage: "For a list of commands, type /excavator help"
+    usage: "/excavator give <player> <pickaxe|axe|shovel> <2x2|3x3|5x5>"
     aliases: ex
 permissions:
   excavator.test:

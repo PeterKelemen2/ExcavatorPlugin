@@ -13,6 +13,7 @@ import dev.peti.excavator.tools.ExcavatorToolType;
  */
 public class ToolFactory {
 	private final NamespacedKey excavatorKey;
+	private final NamespacedKey excavatorToolKey;
 
 	/**
 	 * Constructs the factory.
@@ -20,6 +21,7 @@ public class ToolFactory {
 	 */
 	public ToolFactory(Plugin plugin) {
 		this.excavatorKey = new NamespacedKey(plugin, "excavator_size");
+		this.excavatorToolKey = new NamespacedKey(plugin, "excavator_tool");
 	}
 
 	/**
@@ -34,6 +36,9 @@ public class ToolFactory {
 			throw new IllegalStateException("ItemMeta is null");
 		}
 		meta.getPersistentDataContainer().set(excavatorKey, PersistentDataType.INTEGER, type.getSize());
+		// Store the tool type as a string: pickaxe, axe, or shovel
+		String toolType = type.name().split("_")[0].toLowerCase();
+		meta.getPersistentDataContainer().set(excavatorToolKey, PersistentDataType.STRING, toolType);
 		meta.setDisplayName(type.getDisplayName());
 		meta.setLore(type.getLore());
 		item.setItemMeta(meta); // Ensure meta is applied
@@ -50,6 +55,10 @@ public class ToolFactory {
 	 */
 	public NamespacedKey getExcavatorKey() {
 		return excavatorKey;
+	}
+
+	public NamespacedKey getExcavatorToolKey() {
+		return excavatorToolKey;
 	}
 }
 

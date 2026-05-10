@@ -50,10 +50,15 @@ public class ToolManager {
 		ItemMeta meta = item.getItemMeta();
 		PersistentDataContainer pdc = meta.getPersistentDataContainer();
 		Integer size = pdc.get(excavatorKey, PersistentDataType.INTEGER);
-		if (size == null) {
+		String tool = null;
+		// Try to get the tool type string if present
+		if (pdc.has(new NamespacedKey(excavatorKey.getNamespace(), "excavator_tool"), PersistentDataType.STRING)) {
+			tool = pdc.get(new NamespacedKey(excavatorKey.getNamespace(), "excavator_tool"), PersistentDataType.STRING);
+		}
+		if (size == null || tool == null) {
 			return null;
 		}
-		return ExcavatorToolType.fromSize(size);
+		return ExcavatorToolType.fromToolAndSize(tool, size);
 	}
 }
 

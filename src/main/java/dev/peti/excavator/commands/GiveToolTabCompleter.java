@@ -33,11 +33,18 @@ public class GiveToolTabCompleter implements TabCompleter {
             return playerNames;
         }
         if (args.length == 3 && args[0].equals("give")) {
-            List<String> types = new ArrayList<>();
-            if ("2x2".startsWith(args[2])) types.add("2x2");
-            if ("3x3".startsWith(args[2])) types.add("3x3");
-            if ("5x5".startsWith(args[2])) types.add("5x5");
-            return types;
+            List<String> tools = new ArrayList<>();
+            if ("pickaxe".startsWith(args[2])) tools.add("pickaxe");
+            if ("axe".startsWith(args[2])) tools.add("axe");
+            if ("shovel".startsWith(args[2])) tools.add("shovel");
+            return tools;
+        }
+        if (args.length == 4 && args[0].equals("give")) {
+            List<String> sizes = new ArrayList<>();
+            if ("2x2".startsWith(args[3])) sizes.add("2x2");
+            if ("3x3".startsWith(args[3])) sizes.add("3x3");
+            if ("5x5".startsWith(args[3])) sizes.add("5x5");
+            return sizes;
         }
         return Collections.emptyList();
     }

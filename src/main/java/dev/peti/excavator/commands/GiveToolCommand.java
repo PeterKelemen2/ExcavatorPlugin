@@ -42,8 +42,8 @@ public class GiveToolCommand implements CommandExecutor {
 			sender.sendMessage("§cOnly operators can use this command.");
 			return true;
 		}
-		if (args.length != 3 || !args[0].equalsIgnoreCase("give")) {
-			sender.sendMessage("§cUsage: /excavator give <player> <2x2|3x3|5x5>");
+		if (args.length != 4 || !args[0].equalsIgnoreCase("give")) {
+			sender.sendMessage("§cUsage: /excavator give <player> <pickaxe|axe|shovel> <2x2|3x3|5x5>");
 			return true;
 		}
 		Player target = Bukkit.getPlayerExact(args[1]);
@@ -51,9 +51,20 @@ public class GiveToolCommand implements CommandExecutor {
 			sender.sendMessage("§cPlayer not found: " + args[1]);
 			return true;
 		}
-		ExcavatorToolType type = parseType(args[2]);
+		String toolArg = args[2];
+		String sizeArg = args[3];
+		if (!ExcavatorToolType.isValidTool(toolArg)) {
+			sender.sendMessage("§cInvalid tool. Use pickaxe, axe, or shovel.");
+			return true;
+		}
+		int size = parseSize(sizeArg);
+		if (size == -1) {
+			sender.sendMessage("§cInvalid size. Use 2x2, 3x3, or 5x5.");
+			return true;
+		}
+		ExcavatorToolType type = ExcavatorToolType.fromToolAndSize(toolArg, size);
 		if (type == null) {
-			sender.sendMessage("§cInvalid tool type. Use 2x2, 3x3, or 5x5.");
+			sender.sendMessage("§cInvalid tool/size combination.");
 			return true;
 		}
 		ItemStack tool = toolFactory.createExcavator(type);
@@ -63,16 +74,14 @@ public class GiveToolCommand implements CommandExecutor {
 	}
 
 	/**
-	 * Parses the tool type argument.
-	 * @param arg the argument
-	 * @return the tool type or null
+	 * Parses the size argument (e.g., "2x2") to an int (2, 3, 5), or -1 if invalid.
 	 */
-	private ExcavatorToolType parseType(String arg) {
-		return switch (arg.toLowerCase()) {
-			case "2x2" -> ExcavatorToolType.EXCAVATOR_2X2;
-			case "3x3" -> ExcavatorToolType.EXCAVATOR_3X3;
-			case "5x5" -> ExcavatorToolType.EXCAVATOR_5X5;
-			default -> null;
+	private int parseSize(String arg) {
+		return switch (arg) {
+			case "2x2" -> 2;
+			case "3x3" -> 3;
+			case "5x5" -> 5;
+			default -> -1;
 		};
 	}
 }
