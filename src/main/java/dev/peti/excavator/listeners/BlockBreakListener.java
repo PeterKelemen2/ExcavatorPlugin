@@ -1,4 +1,3 @@
-
 package dev.peti.excavator.listeners;
 
 import dev.peti.excavator.ExcavatorPlugin;
@@ -42,29 +41,36 @@ public class BlockBreakListener implements Listener {
 	public void onBlockBreak(BlockBreakEvent event) {
 		Player player = event.getPlayer();
 		ItemStack tool = player.getInventory().getItemInMainHand();
-		plugin.getLogger().info("[DEBUG] BlockBreakEvent triggered for player: " + player.getName());
+		debug("BlockBreakEvent triggered for player: " + player.getName());
 		if (!toolManager.isExcavator(tool)) {
-			plugin.getLogger().info("[DEBUG] Tool is NOT recognized as excavator.");
+			debug("Tool is NOT recognized as excavator.");
 			return;
-		} else {
-			plugin.getLogger().info("[DEBUG] Tool IS recognized as excavator.");
 		}
+		debug("Tool IS recognized as excavator.");
 		if (RecursionGuard.isProcessing(player.getUniqueId())) {
-			plugin.getLogger().info("[DEBUG] RecursionGuard active, skipping.");
+			debug("RecursionGuard active, skipping.");
 			return;
 		}
 		ExcavatorToolType type = toolManager.getToolType(tool);
 		if (type == null) {
-			plugin.getLogger().info("[DEBUG] ExcavatorToolType is null (PDC missing or invalid).");
+			debug("ExcavatorToolType is null (PDC missing or invalid).");
 			return;
 		}
-		plugin.getLogger().info("[DEBUG] Mining pipeline entered for type: " + type);
+		debug("Mining pipeline entered for type: " + type);
 		RecursionGuard.start(player.getUniqueId());
 		try {
-			miningProcessor.process(player, event.getBlock(), tool, type);
-			event.setCancelled(true);
+			boolean mined = miningProcessor.process(player, event.getBlock(), tool, type);
+			if (mined) {
+				event.setCancelled(true);
+			}
 		} finally {
 			RecursionGuard.end(player.getUniqueId());
+		}
+	}
+
+	private void debug(String message) {
+		if (plugin.isDebug()) {
+			plugin.getLogger().info("[DEBUG] " + message);
 		}
 	}
 }

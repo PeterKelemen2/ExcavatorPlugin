@@ -9,14 +9,15 @@ public class BlockFilter {
 		if (block == null) return false;
 		Material type = block.getType();
 		if (type.isAir() || !type.isBlock()) return false;
-		// Paper API: liquids are not blocks, so isBlock() covers it
+		// Tile entities (chests, furnaces, etc.) should not be mass-broken
 		if (block.getState() instanceof TileState) return false;
 		if (!block.getChunk().isLoaded()) return false;
-		if (!type.isSolid()) return false;
-		// Unbreakable blocks
+		// Unbreakable blocks (bedrock, barriers, etc.) have hardness < 0
 		try {
 			if (type.getHardness() < 0) return false;
 		} catch (NoSuchMethodError ignored) {}
+		// Note: isSolid() is intentionally NOT checked here – it returns false for
+		// leaves and other valid breakable blocks (e.g. axe targets).
 		return true;
 	}
 }

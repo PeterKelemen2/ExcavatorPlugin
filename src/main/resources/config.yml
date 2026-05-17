@@ -1,1 +1,6 @@
 # A journey of 1,000 lines starts with a single char
+
+# Excavator Plugin Configuration
+
+# Set to true to enable verbose debug logging in the console.
+debug: false

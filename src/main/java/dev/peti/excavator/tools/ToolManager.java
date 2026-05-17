@@ -12,6 +12,7 @@ import org.bukkit.plugin.Plugin;
  */
 public class ToolManager {
 	private final NamespacedKey excavatorKey;
+	private final NamespacedKey excavatorToolKey;
 
 	/**
 	 * Constructs the manager.
@@ -19,6 +20,7 @@ public class ToolManager {
 	 */
 	public ToolManager(Plugin plugin) {
 		this.excavatorKey = new NamespacedKey(plugin, "excavator_size");
+		this.excavatorToolKey = new NamespacedKey(plugin, "excavator_tool");
 	}
 
 	/**
@@ -51,9 +53,8 @@ public class ToolManager {
 		PersistentDataContainer pdc = meta.getPersistentDataContainer();
 		Integer size = pdc.get(excavatorKey, PersistentDataType.INTEGER);
 		String tool = null;
-		// Try to get the tool type string if present
-		if (pdc.has(new NamespacedKey(excavatorKey.getNamespace(), "excavator_tool"), PersistentDataType.STRING)) {
-			tool = pdc.get(new NamespacedKey(excavatorKey.getNamespace(), "excavator_tool"), PersistentDataType.STRING);
+		if (pdc.has(excavatorToolKey, PersistentDataType.STRING)) {
+			tool = pdc.get(excavatorToolKey, PersistentDataType.STRING);
 		}
 		if (size == null || tool == null) {
 			return null;
@@ -61,4 +62,3 @@ public class ToolManager {
 		return ExcavatorToolType.fromToolAndSize(tool, size);
 	}
 }
-

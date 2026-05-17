@@ -1,7 +1,6 @@
-
 package dev.peti.excavator.mining;
 
-import java.security.SecureRandom;
+import java.util.concurrent.ThreadLocalRandom;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
@@ -10,7 +9,6 @@ import org.bukkit.inventory.meta.Damageable;
  * Utility for handling tool durability and Unbreaking logic.
  */
 public class DurabilityManager {
-	private static final SecureRandom RANDOM = new SecureRandom();
 
 	/**
 	 * Simulate Unbreaking for a batch of blocks. Returns a boolean array where true means durability is consumed for that block.
@@ -25,7 +23,7 @@ public class DurabilityManager {
 		boolean[] rolls = new boolean[validBlocks];
 		for (int i = 0; i < validBlocks; i++) {
 			// Vanilla: chance to NOT consume durability is unbreaking/(unbreaking+1)
-			rolls[i] = (unbreaking <= 0) || (RANDOM.nextInt(unbreaking + 1) == 0);
+			rolls[i] = (unbreaking <= 0) || (ThreadLocalRandom.current().nextInt(unbreaking + 1) == 0);
 		}
 		return rolls;
 	}
@@ -47,7 +45,8 @@ public class DurabilityManager {
 	}
 
 	/**
-	 * Checks if the tool has enough durability.
+	 * Checks if the tool has enough durability to cover the cost.
+	 * Allows the tool to be fully consumed (reaching 0 remaining), matching vanilla behaviour.
 	 *
 	 * @param tool the tool
 	 * @param cost durability cost
@@ -57,7 +56,7 @@ public class DurabilityManager {
 		Damageable meta = (Damageable) tool.getItemMeta();
 		int current = meta.getDamage();
 		int max = tool.getType().getMaxDurability();
-		return max - current > cost;
+		return (max - current) >= cost;
 	}
 
 	/**

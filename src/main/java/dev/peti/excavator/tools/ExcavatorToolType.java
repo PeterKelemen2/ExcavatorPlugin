@@ -46,7 +46,6 @@ public enum ExcavatorToolType {
 	}
 
 	public static ExcavatorToolType fromToolAndSize(String tool, int size) {
-		String key = tool.toUpperCase() + "_" + size + "X" + size;
 		for (ExcavatorToolType type : values()) {
 			if (type.name().startsWith(tool.toUpperCase()) && type.size == size) {
 				return type;

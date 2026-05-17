@@ -35,4 +35,8 @@ public class ExcavatorPlugin extends JavaPlugin {
 	public ToolManager getToolManager() {
 		return toolManager;
 	}
+
+	public boolean isDebug() {
+		return getConfig().getBoolean("debug", false);
+	}
 }
