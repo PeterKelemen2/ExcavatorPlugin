@@ -1,6 +1,6 @@
 main: dev.peti.excavator.ExcavatorPlugin
 name: Excavator
-version: "1.1.0"
+version: "1.2.0"
 api-version: "1.21"
 author: AUTHOR
 description: Area mining tools (2x2, 3x3, 5x5) with crafting, toggles and stats.

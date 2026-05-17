@@ -102,6 +102,8 @@ public class MiningProcessor {
 		if (minedCount > 0 && statsManager != null) {
 			statsManager.addBlocks(player.getUniqueId(), minedCount);
 		}
+		// Inventory fullness warnings are handled by InventoryWarningListener
+		// on EntityPickupItemEvent, so no check is needed here.
 		return true;
 	}
 

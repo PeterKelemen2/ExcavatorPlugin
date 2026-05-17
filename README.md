@@ -16,6 +16,12 @@ A Minecraft Paper 1.21.1 plugin that adds **area mining tools** — pickaxes, ax
 - **Sneak to disable** — hold Shift while breaking to mine a single block, ignoring the area effect.
 - **`/excavator toggle`** — flip the area effect on/off for your account (in-memory; resets on server restart).
 
+### Inventory Full Warning
+- Non-intrusive **action bar** notification when your inventory starts filling up from area mining.
+- **Stepped warnings** (configurable) — by default at **75%**, **90%**, and **98%** full, each with a distinct color (yellow → gold → red).
+- Each step fires at most once per crossing; freeing slots below a step re-arms it for next time.
+- Fully configurable in `config.yml` under `inventory-warning` (thresholds, messages, colors, or disable entirely).
+
 ### Crafting
 - All excavator tools are **craftable**. Recipe (3×3 grid):
 
@@ -30,6 +36,7 @@ A Minecraft Paper 1.21.1 plugin that adds **area mining tools** — pickaxes, ax
 ### Configuration (`config.yml`)
 - `debug: true|false` — verbose logging.
 - `tools.<tool>-<size>` — override the base material per tool/size (e.g. swap `pickaxe-2x2` from `IRON_PICKAXE` to `STONE_PICKAXE`). Non-tool materials are rejected with a warning and fall back to defaults.
+- `inventory-warning.enabled` and `inventory-warning.steps` — toggle and tune the stepped inventory-full action bar warnings.
 
 ### Statistics
 - Per-player block counts are tracked and saved to `plugins/Excavator/stats.yml`.

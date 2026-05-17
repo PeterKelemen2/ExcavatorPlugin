@@ -3,6 +3,7 @@ package dev.peti.excavator;
 import dev.peti.excavator.commands.ExcavatorCommand;
 import dev.peti.excavator.commands.GiveToolTabCompleter;
 import dev.peti.excavator.listeners.BlockBreakListener;
+import dev.peti.excavator.listeners.InventoryWarningListener;
 import dev.peti.excavator.mining.MiningProcessor;
 import dev.peti.excavator.mining.PlayerToggleManager;
 import dev.peti.excavator.mining.ProtectionManager;
@@ -10,7 +11,11 @@ import dev.peti.excavator.stats.StatsManager;
 import dev.peti.excavator.tools.RecipeManager;
 import dev.peti.excavator.tools.ToolFactory;
 import dev.peti.excavator.tools.ToolManager;
+import dev.peti.excavator.util.InventoryWarningManager;
 import io.papermc.lib.PaperLib;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
 /**
@@ -24,6 +29,7 @@ public class ExcavatorPlugin extends JavaPlugin {
 	private PlayerToggleManager toggleManager;
 	private StatsManager statsManager;
 	private RecipeManager recipeManager;
+	private InventoryWarningManager inventoryWarningManager;
 
 	@Override
 	public void onEnable() {
@@ -35,6 +41,7 @@ public class ExcavatorPlugin extends JavaPlugin {
 		this.toggleManager = new PlayerToggleManager();
 		this.statsManager = new StatsManager(this);
 		this.recipeManager = new RecipeManager(this, toolFactory);
+		this.inventoryWarningManager = new InventoryWarningManager(this);
 
 		MiningProcessor miningProcessor = new MiningProcessor(new ProtectionManager(), statsManager);
 
@@ -44,6 +51,16 @@ public class ExcavatorPlugin extends JavaPlugin {
 
 		getServer().getPluginManager().registerEvents(
 				new BlockBreakListener(this, miningProcessor, toggleManager), this);
+		getServer().getPluginManager().registerEvents(
+				new InventoryWarningListener(inventoryWarningManager), this);
+
+		// Forget per-player warning state on quit.
+		getServer().getPluginManager().registerEvents(new Listener() {
+			@EventHandler
+			public void onQuit(PlayerQuitEvent event) {
+				inventoryWarningManager.forget(event.getPlayer().getUniqueId());
+			}
+		}, this);
 
 		recipeManager.registerAll();
 	}

@@ -18,3 +18,23 @@ tools:
   shovel-2x2: IRON_SHOVEL
   shovel-3x3: DIAMOND_SHOVEL
   shovel-5x5: NETHERITE_SHOVEL
+
+# Non-intrusive action bar notification when a player's inventory fills up
+# during area mining. Steps fire at most once per "crossing"; freeing slots
+# below a step resets it so it can warn again next time.
+inventory-warning:
+  enabled: true
+  # Thresholds are fractions of occupied storage slots (0.0 - 1.0) out of 36.
+  # Supported colors: any Minecraft named color (yellow, gold, red, ...) or
+  # a CSS hex string (e.g. "#ffaa00"). "{percent}" is replaced at runtime.
+  steps:
+    - threshold: 0.75
+      message: "Inventory {percent}% full"
+      color: yellow
+    - threshold: 0.90
+      message: "Inventory {percent}% full - almost out of space!"
+      color: gold
+    - threshold: 0.98
+      message: "Inventory {percent}% full - drops may be lost!"
+      color: red
+
