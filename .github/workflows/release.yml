@@ -1,0 +1,117 @@
+name: Release
+
+# Fires on every push to main. The job then checks whether the version
+# line in plugin.yml actually changed; if it didn't (or a release for
+# that version already exists) the job exits early without doing anything.
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'src/main/resources/plugin.yml'
+
+jobs:
+  release:
+    name: Build & publish release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write   # needed to create releases and push tags
+
+    steps:
+      - name: Checkout (with history for diff)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2          # need the previous commit to diff the version
+
+      # ── Read current version ──────────────────────────────────────────────
+      - name: Read version from plugin.yml
+        id: version
+        run: |
+          VERSION=$(grep '^version:' src/main/resources/plugin.yml \
+            | sed 's/version:[[:space:]]*"//;s/"//')
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Detected version: $VERSION"
+
+      # ── Check whether the version line itself changed ─────────────────────
+      - name: Check if version changed
+        id: changed
+        run: |
+          OLD=$(git show HEAD~1:src/main/resources/plugin.yml 2>/dev/null \
+            | grep '^version:' \
+            | sed 's/version:[[:space:]]*"//;s/"//' \
+            || echo "")
+          NEW="${{ steps.version.outputs.version }}"
+          echo "Previous version: $OLD"
+          echo "New version:      $NEW"
+          if [ "$OLD" = "$NEW" ]; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      # ── Guard: skip everything below if the version didn't change ─────────
+      - name: Skip if version unchanged
+        if: steps.changed.outputs.changed == 'false'
+        run: echo "Version unchanged – nothing to release."
+
+      # ── Check for an existing release so we never publish the same tag twice
+      - name: Check if GitHub release already exists
+        if: steps.changed.outputs.changed == 'true'
+        id: check_release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="v${{ steps.version.outputs.version }}"
+          if gh release view "$TAG" &>/dev/null; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+            echo "Release $TAG already exists – skipping."
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      # ── Java / Gradle setup ───────────────────────────────────────────────
+      - name: Set up JDK 21
+        if: >
+          steps.changed.outputs.changed == 'true' &&
+          steps.check_release.outputs.exists == 'false'
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Cache Gradle packages
+        if: >
+          steps.changed.outputs.changed == 'true' &&
+          steps.check_release.outputs.exists == 'false'
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      # ── Build ─────────────────────────────────────────────────────────────
+      - name: Build release JAR
+        if: >
+          steps.changed.outputs.changed == 'true' &&
+          steps.check_release.outputs.exists == 'false'
+        run: |
+          chmod +x gradlew
+          ./gradlew release -Pver=${{ steps.version.outputs.version }}
+
+      # ── Publish ───────────────────────────────────────────────────────────
+      - name: Create GitHub Release
+        if: >
+          steps.changed.outputs.changed == 'true' &&
+          steps.check_release.outputs.exists == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="v${{ steps.version.outputs.version }}"
+          gh release create "$TAG" \
+            --title "Excavator $TAG" \
+            --generate-notes \
+            build/libs/excavator.jar#excavator-${{ steps.version.outputs.version }}.jar
+
