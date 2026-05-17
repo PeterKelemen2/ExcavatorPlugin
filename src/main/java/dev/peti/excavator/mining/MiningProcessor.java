@@ -1,5 +1,6 @@
 package dev.peti.excavator.mining;
 
+import dev.peti.excavator.stats.StatsManager;
 import dev.peti.excavator.tools.ExcavatorToolType;
 import org.bukkit.GameMode;
 import org.bukkit.block.Block;
@@ -18,9 +19,11 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class MiningProcessor {
 	private final ProtectionManager protectionManager;
+	private final StatsManager statsManager;
 
-	public MiningProcessor(ProtectionManager protectionManager) {
+	public MiningProcessor(ProtectionManager protectionManager, StatsManager statsManager) {
 		this.protectionManager = protectionManager;
+		this.statsManager = statsManager;
 	}
 
 	/**
@@ -49,6 +52,7 @@ public class MiningProcessor {
 		// Mining
 		boolean silkTouch = tool != null && tool.containsEnchantment(org.bukkit.enchantments.Enchantment.SILK_TOUCH);
 		int totalXp = 0;
+		int minedCount = 0;
 		for (Block block : area) {
 			// Fire BlockBreakEvent for plugin compatibility
 			BlockBreakEvent breakEvent = new BlockBreakEvent(block, player);
@@ -57,16 +61,28 @@ public class MiningProcessor {
 			Material preBreakType = block.getType();
 			block.breakNaturally(tool);
 			totalXp += getVanillaXp(preBreakType, silkTouch);
+			minedCount++;
 		}
-		// Spawn a single batched XP orb at the anchor location
-		if (!creative && totalXp > 0) {
-			World world = anchor.getWorld();
-			ExperienceOrb orb = world.spawn(anchor.getLocation().add(0.5, 0.5, 0.5), ExperienceOrb.class);
-			orb.setExperience(totalXp);
-		}
-		// Durability application
+		// Durability application + Mending
 		if (!creative && durabilityCost > 0) {
-			DurabilityManager.applyDamage(tool, durabilityCost);
+			int mendingRepaired = 0;
+			boolean hasMending = tool.containsEnchantment(org.bukkit.enchantments.Enchantment.MENDING);
+			if (hasMending && totalXp > 0) {
+				// Vanilla: 1 XP point repairs 2 durability, capped at remaining damage and remaining XP.
+				int currentDamage = ((Damageable) tool.getItemMeta()).getDamage();
+				int repairCap = currentDamage + durabilityCost; // max durability that could be repaired
+				int xpAvailable = totalXp;
+				int repairFromXp = Math.min(xpAvailable * 2, repairCap);
+				mendingRepaired = repairFromXp;
+				int xpConsumed = (repairFromXp + 1) / 2; // round up
+				totalXp -= xpConsumed;
+			}
+			int netCost = durabilityCost - mendingRepaired;
+			if (netCost > 0) {
+				DurabilityManager.applyDamage(tool, netCost);
+			} else if (netCost < 0) {
+				DurabilityManager.applyDamage(tool, netCost); // negative = repair
+			}
 			// Check if tool is broken
 			Damageable meta = (Damageable) tool.getItemMeta();
 			int max = tool.getType().getMaxDurability();
@@ -75,6 +91,16 @@ public class MiningProcessor {
 				player.getInventory().setItem(EquipmentSlot.HAND, null);
 				player.playSound(player.getLocation(), Sound.ENTITY_ITEM_BREAK, 1.0f, 1.0f);
 			}
+		}
+		// Spawn a single batched XP orb at the anchor location (after Mending consumed some)
+		if (!creative && totalXp > 0) {
+			World world = anchor.getWorld();
+			ExperienceOrb orb = world.spawn(anchor.getLocation().add(0.5, 0.5, 0.5), ExperienceOrb.class);
+			orb.setExperience(totalXp);
+		}
+		// Statistics
+		if (minedCount > 0 && statsManager != null) {
+			statsManager.addBlocks(player.getUniqueId(), minedCount);
 		}
 		return true;
 	}

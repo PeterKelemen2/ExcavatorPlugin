@@ -6,12 +6,12 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
-import dev.peti.excavator.tools.ExcavatorToolType;
 
 /**
  * Factory for creating custom excavator tools.
  */
 public class ToolFactory {
+	private final Plugin plugin;
 	private final NamespacedKey excavatorKey;
 	private final NamespacedKey excavatorToolKey;
 
@@ -20,8 +20,30 @@ public class ToolFactory {
 	 * @param plugin the plugin instance
 	 */
 	public ToolFactory(Plugin plugin) {
+		this.plugin = plugin;
 		this.excavatorKey = new NamespacedKey(plugin, "excavator_size");
 		this.excavatorToolKey = new NamespacedKey(plugin, "excavator_tool");
+	}
+
+	/**
+	 * Resolves the configured material for the given tool type, falling back to the enum default.
+	 */
+	public Material getMaterialFor(ExcavatorToolType type) {
+		String configured = plugin.getConfig().getString("tools." + type.getConfigKey());
+		if (configured != null) {
+			try {
+				Material mat = Material.valueOf(configured.toUpperCase());
+				if (mat.name().endsWith("_PICKAXE") || mat.name().endsWith("_AXE") || mat.name().endsWith("_SHOVEL")) {
+					return mat;
+				}
+				plugin.getLogger().warning("Configured material " + configured + " for " + type.getConfigKey()
+						+ " is not a tool – falling back to default.");
+			} catch (IllegalArgumentException ex) {
+				plugin.getLogger().warning("Unknown material '" + configured + "' for " + type.getConfigKey()
+						+ " – falling back to default.");
+			}
+		}
+		return type.getMaterial();
 	}
 
 	/**
@@ -30,7 +52,8 @@ public class ToolFactory {
 	 * @return the item stack
 	 */
 	public ItemStack createExcavator(ExcavatorToolType type) {
-		ItemStack item = new ItemStack(type.getMaterial());
+		Material material = getMaterialFor(type);
+		ItemStack item = new ItemStack(material);
 		ItemMeta meta = item.getItemMeta();
 		if (meta == null) {
 			throw new IllegalStateException("ItemMeta is null");
@@ -45,10 +68,6 @@ public class ToolFactory {
 		return item;
 	}
 
-	private boolean isPickaxe(Material material) {
-		return material.name().endsWith("_PICKAXE");
-	}
-
 	/**
 	 * Gets the excavator key.
 	 * @return the key
@@ -61,4 +80,3 @@ public class ToolFactory {
 		return excavatorToolKey;
 	}
 }
-

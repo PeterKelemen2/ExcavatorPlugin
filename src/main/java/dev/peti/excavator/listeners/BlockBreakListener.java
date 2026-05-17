@@ -2,7 +2,7 @@ package dev.peti.excavator.listeners;
 
 import dev.peti.excavator.ExcavatorPlugin;
 import dev.peti.excavator.mining.MiningProcessor;
-import dev.peti.excavator.mining.ProtectionManager;
+import dev.peti.excavator.mining.PlayerToggleManager;
 import dev.peti.excavator.mining.RecursionGuard;
 import dev.peti.excavator.tools.ExcavatorToolType;
 import dev.peti.excavator.tools.ToolManager;
@@ -18,25 +18,20 @@ import org.bukkit.inventory.ItemStack;
  * Listener for block break events to handle Excavator tool logic.
  */
 public class BlockBreakListener implements Listener {
-	/** Plugin instance (not exposed externally). */
 	private final ExcavatorPlugin plugin;
 	private final ToolManager toolManager;
-	private final MiningProcessor miningProcessor = new MiningProcessor(new ProtectionManager());
+	private final MiningProcessor miningProcessor;
+	private final PlayerToggleManager toggleManager;
 
-	/**
-	 * Constructs the listener.
-	 * @param plugin plugin instance (not stored externally)
-	 */
-	public BlockBreakListener(ExcavatorPlugin plugin) {
+	public BlockBreakListener(ExcavatorPlugin plugin,
+							  MiningProcessor miningProcessor,
+							  PlayerToggleManager toggleManager) {
 		this.plugin = Objects.requireNonNull(plugin);
 		this.toolManager = plugin.getToolManager();
+		this.miningProcessor = miningProcessor;
+		this.toggleManager = toggleManager;
 	}
 
-	/**
-	 * Handles block break events for Excavator tools.
-	 *
-	 * @param event the block break event
-	 */
 	@EventHandler(ignoreCancelled = true)
 	public void onBlockBreak(BlockBreakEvent event) {
 		Player player = event.getPlayer();
@@ -47,6 +42,16 @@ public class BlockBreakListener implements Listener {
 			return;
 		}
 		debug("Tool IS recognized as excavator.");
+		// Sneak to disable area effect for a single break
+		if (player.isSneaking()) {
+			debug("Player is sneaking - skipping area effect.");
+			return;
+		}
+		// Per-player toggle
+		if (toggleManager.isDisabled(player.getUniqueId())) {
+			debug("Area mining toggled off for this player - skipping.");
+			return;
+		}
 		if (RecursionGuard.isProcessing(player.getUniqueId())) {
 			debug("RecursionGuard active, skipping.");
 			return;
@@ -54,6 +59,11 @@ public class BlockBreakListener implements Listener {
 		ExcavatorToolType type = toolManager.getToolType(tool);
 		if (type == null) {
 			debug("ExcavatorToolType is null (PDC missing or invalid).");
+			return;
+		}
+		// Permission gate for actually using the area effect
+		if (!player.isOp() && !player.hasPermission("excavator.use")) {
+			debug("Player lacks excavator.use permission.");
 			return;
 		}
 		debug("Mining pipeline entered for type: " + type);

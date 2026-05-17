@@ -45,6 +45,14 @@ public enum ExcavatorToolType {
 		return material;
 	}
 
+	/**
+	 * @return the config key used to look up the material override, e.g. {@code "pickaxe-2x2"}
+	 */
+	public String getConfigKey() {
+		String toolPart = name().split("_")[0].toLowerCase();
+		return toolPart + "-" + size + "x" + size;
+	}
+
 	public static ExcavatorToolType fromToolAndSize(String tool, int size) {
 		for (ExcavatorToolType type : values()) {
 			if (type.name().startsWith(tool.toUpperCase()) && type.size == size) {

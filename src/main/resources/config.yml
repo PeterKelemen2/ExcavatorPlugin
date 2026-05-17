@@ -4,3 +4,17 @@
 
 # Set to true to enable verbose debug logging in the console.
 debug: false
+
+# Configurable base material per tool type/size.
+# These are also used as the corner ingredient in the crafting recipe.
+# Must be a valid Bukkit Material name (pickaxe/axe/shovel of any tier).
+tools:
+  pickaxe-2x2: IRON_PICKAXE
+  pickaxe-3x3: DIAMOND_PICKAXE
+  pickaxe-5x5: NETHERITE_PICKAXE
+  axe-2x2: IRON_AXE
+  axe-3x3: DIAMOND_AXE
+  axe-5x5: NETHERITE_AXE
+  shovel-2x2: IRON_SHOVEL
+  shovel-3x3: DIAMOND_SHOVEL
+  shovel-5x5: NETHERITE_SHOVEL

@@ -1,20 +1,36 @@
 main: dev.peti.excavator.ExcavatorPlugin
 name: Excavator
-version: "1.0.0"
+version: "1.1.0"
 api-version: "1.21"
 author: AUTHOR
-description: DESCRIPTION
+description: Area mining tools (2x2, 3x3, 5x5) with crafting, toggles and stats.
 commands:
   excavator:
     description: Base command for Excavator
-    usage: "/excavator give <player> <pickaxe|axe|shovel> <2x2|3x3|5x5>"
+    usage: "/excavator <give|toggle|reload|stats>"
     aliases: ex
 permissions:
-  excavator.test:
-    description: DESCRIPTION
+  excavator.use:
+    description: Allows using excavator tools to area-mine.
     default: true
+  excavator.toggle:
+    description: Allows toggling the area mining effect on/off.
+    default: true
+  excavator.stats:
+    description: Allows viewing excavator statistics.
+    default: true
+  excavator.give:
+    description: Allows giving excavator tools to players.
+    default: op
+  excavator.reload:
+    description: Allows reloading the plugin configuration.
+    default: op
   excavator.*:
-    description: Grants all other permissions
-    default: false
+    description: Grants all excavator permissions.
+    default: op
     children:
-      excavator.test: true
+      excavator.use: true
+      excavator.toggle: true
+      excavator.stats: true
+      excavator.give: true
+      excavator.reload: true

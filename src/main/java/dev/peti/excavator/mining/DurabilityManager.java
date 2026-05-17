@@ -60,14 +60,15 @@ public class DurabilityManager {
 	}
 
 	/**
-	 * Applies durability damage to the tool.
+	 * Applies durability damage to the tool. Negative values repair the tool (used by Mending).
 	 *
 	 * @param tool the tool
-	 * @param cost durability cost
+	 * @param cost durability cost (positive = damage, negative = repair)
 	 */
 	public static void applyDamage(ItemStack tool, int cost) {
 		Damageable meta = (Damageable) tool.getItemMeta();
-		meta.setDamage(meta.getDamage() + cost);
+		int newDamage = Math.max(0, meta.getDamage() + cost);
+		meta.setDamage(newDamage);
 		tool.setItemMeta((org.bukkit.inventory.meta.ItemMeta) meta);
 	}
 }
